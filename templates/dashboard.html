@@ -5,10 +5,28 @@ Dashboard
 {% endblock %}
 
 {% block main %}
+    Welcome, {{ current_user.username }}
+    <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+    <script>
+    document.addEventListener("DOMContentLoaded", function() {
+        
+            var socket = io();
+            username = "{{ current_user.username }}";
 
-{% if current_user.is_authenticated %}
-    Welcome, {{ current_user.username }}.
-    <a href="{{ url_for('logout') }}">Log out</a>
-{% endif %}
+            socket.on('connect', function(){
+                socket.emit('systemMessage',username+' has connected');
+            });
 
+            document.querySelector("#room").addEventListener('click', function(e){
+                e.preventDefault();
+                var roomName = document.querySelector('#room').value;
+                socket.emit('systemMessage',roomName);
+            })
+    
+    });
+    </script>
+    <div>
+        <h3>Room 1</h3>
+        <button type="submit" id="room" value="room 1">Join</button>
+    </div>
 {% endblock %}
