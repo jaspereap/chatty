@@ -16,17 +16,28 @@ Dashboard
             socket.on('connect', function(){
                 socket.emit('systemMessage',username+' has connected');
             });
-
-            document.querySelector("#room").addEventListener('click', function(e){
-                e.preventDefault();
-                var roomName = document.querySelector('#room').value;
-                socket.emit('systemMessage',roomName);
-            })
     
     });
     </script>
+
+    {% for room in rooms %}
     <div>
-        <h3>Room 1</h3>
-        <button type="submit" id="room" value="room 1">Join</button>
+        <h3>{{ room['room_name'] }}</h3>
+        <button type="submit" id="room-{{ room['room_id'] }}" value="{{ room['room_name'] }}">Join</button>
     </div>
+    <script>
+        document.addEventListener("DOMContentLoaded", function(){
+            var socket = io();
+            var room_id = {{ room['room_id'] }}
+            var room_query_id = "room-{{ room['room_id'] }}";
+            document.querySelector("#" + room_query_id).addEventListener('click', function(e){
+            e.preventDefault();
+            var roomName = document.querySelector("#" + room_query_id).value;
+            socket.emit('systemMessage',roomName);
+            socket.emit('joinRoom',{'username':username,'room_id':room_id });
+            });
+        });
+
+    </script>
+    {% endfor %}
 {% endblock %}

@@ -1,8 +1,8 @@
-from flask import Flask, render_template, request, redirect, url_for, flash, session, g
+from flask import Flask, render_template, request, redirect, url_for, flash, session, g 
 from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required, current_user
 import sqlite3
 from werkzeug.security import check_password_hash, generate_password_hash
-from flask_socketio import SocketIO, send, emit
+from flask_socketio import SocketIO, send, emit, join_room, leave_room
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'super secret key'
@@ -16,6 +16,10 @@ login_manager.init_app(app)
 
 login_manager.login_view = 'login' # name of function to login page
 login_manager.login_message = 'Please log in first.'
+
+rooms = [{"room_id": 1, "room_name": "best room"},
+         {"room_id":2, "room_name": "lol room"}]
+
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -57,8 +61,10 @@ def disconnect():
 
 @socketio.on('joinRoom')
 def joinRoom(data):
-    roomName = data['room']
-
+    room_id = data['room_id']
+    username = data['username']
+    print(f"{username} joins room {room_id}")
+    join_room(room_id)
 
 
 # Flask Routing
@@ -135,7 +141,7 @@ def logout():
 @app.route("/dashboard", methods=['POST','GET'])
 @login_required
 def dashboard():
-    return render_template('dashboard.html')
+    return render_template('dashboard.html', rooms=rooms)
 
 if __name__ == '__main__':
     socketio.run(app)
