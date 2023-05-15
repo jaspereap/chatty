@@ -18,7 +18,15 @@
 
     <body>
     Nav Bar
-
+    {% if not current_user.is_authenticated %}
+        <a href="{{ url_for('register') }}">Register</a>
+        <a href="{{ url_for('login') }}">Login</a>
+    {% endif %}
+    {% if current_user.is_authenticated %}
+        <a href="{{ url_for('dashboard') }}">Dashboard</a>
+        <a href="{{ url_for('logout') }}">Log out</a>
+    {% endif %}
+    
     {% if get_flashed_messages() %}
         <header>
             <div class="alert alert-primary mb-0 text-center" role="alert">
