@@ -2,12 +2,14 @@ from flask import Flask, render_template, request, redirect, url_for, flash, ses
 from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required, current_user
 import sqlite3
 from werkzeug.security import check_password_hash, generate_password_hash
+from flask_socketio import SocketIO, send, emit
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'super secret key'
 app.config['DATABASE'] = 'users.db'
 # For unit testing
 # app.config['LOGIN_DISABLED'] = False
+socketio = SocketIO(app)
 
 login_manager = LoginManager()
 login_manager.init_app(app)
@@ -44,6 +46,22 @@ def close_db(error):
     if db is not None:
         db.close()
 
+# SocketIO
+@socketio.on('systemMessage')
+def systemMessage(message):
+    print("Server message: "+ message)
+
+@socketio.on('disconnect')
+def disconnect():
+    print(current_user.username + " has disconnected")
+
+@socketio.on('joinRoom')
+def joinRoom(data):
+    roomName = data['room']
+
+
+
+# Flask Routing
 @app.route("/")
 def index():
     return render_template("index.html")
@@ -120,4 +138,4 @@ def dashboard():
     return render_template('dashboard.html')
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    socketio.run(app)
