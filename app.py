@@ -60,6 +60,13 @@ def systemMessage(message):
 def disconnect():
     print(current_user.username + " has disconnected")
 
+@socketio.on('redirect_room')
+def redirect_room(data):
+    room_id = data['room_id']
+    room_name = data['room_name']
+    username = data['username']
+    return render_template('chatroom.html', room_id=room_id,room_name=room_name)
+
 @socketio.on('joinRoom')
 def joinRoom(data):
     room_id = data['room_id']
@@ -67,9 +74,14 @@ def joinRoom(data):
     username = data['username']
     print(f"{username} joins room {room_name}, with room id: {room_id}")
     join_room(room_id)
-    emit('redirect_chatroom', {'room_id': room_id, 'room_name': room_name})
-    print("Emitting event 'redirect_chatroom'")
+    emit('group_message',f"{username} has joined {room_name}.",to=room_id)
 
+@socketio.on('groupMessage')
+def groupMessage(data):
+    username = data['username']
+    message = data['message']
+    room_id = data['room_id']
+    emit('group_message',f"{username}: {message}",to=room_id)
 
 # Flask Routing
 @app.route("/")

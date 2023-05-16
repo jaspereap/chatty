@@ -16,19 +16,12 @@ Dashboard
                 socket.emit('systemMessage',username+' has connected');
             });
 
-            socket.on('redirect_chatroom', function(data){
-                var room_id = data['room_id'];
-                var room_name = data['room_name'];
-                console.log('Received redirect request from server, room_id is: '+room_id+' room name is '+room_name);
-                window.location.href = '/chatroom/' + room_id;
-            });
-
             {% for room in rooms %}
                 document.querySelector("#" + "room-{{ room['room_id'] }}").addEventListener('click', function(e){
                     e.preventDefault();
                     var roomName = document.querySelector("#" + "room-{{ room['room_id'] }}").value;
                     socket.emit('systemMessage',roomName);
-                    socket.emit('joinRoom',{'username':username,'room_id':{{ room['room_id'] }}, 'room_name':'{{ room['room_name'] }}'});
+                    window.location.href = '/chatroom/' + '{{ room['room_id'] }}';
                 });
             {% endfor %}
         });

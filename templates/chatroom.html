@@ -6,9 +6,47 @@ Chatroom
 
 {% block main %}
 
-{{ room_id }},{{ room_name }}, {{ current_user.username }}
+room id is {{ room_id }},<br>room name is {{ room_name }}, <br>username is {{ current_user.username }}
+
+<script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+<script>
+    var socket = io();
+    socket.emit('joinRoom',{'username':'{{ current_user.username }}','room_id':{{ room_id }}, 'room_name':'{{ room_name }}'});
+
+    socket.on('group_message', function(message){
+        var messageBox = document.querySelector('#message-box');
+        messageBox.innerHTML += '<div>'+ message + '</div>';
+    });
+</script>
+
 
 <div id="message-box">
 </div>
+{% endblock %}
 
+{% block footer %}
+
+<div id="input-box">
+    <input type="text" id="message-input">
+    <button id="send-message">Send</button>
+</div>
+
+<script>
+    var messageInput = document.querySelector('#message-input');
+    var sendMessage = document.querySelector('#send-message');
+
+    sendMessage.addEventListener('click', function(){
+        var message = messageInput.value;
+        var room_id = {{ room_id }};
+        var username = '{{ current_user.username }}';
+        socket.emit('groupMessage', {'message':message,'room_id':room_id,'username':username} );
+    });
+
+    messageInput.addEventListener('keydown', function(event){
+        if (event.key === 'Enter') {
+            sendMessage.click();
+            messageInput.value = "";
+        }
+    });
+</script>
 {% endblock %}
