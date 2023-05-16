@@ -4,9 +4,19 @@
 Chatroom
 {% endblock %}
 
+{% block header %}
+    {% if owner == current_user.get_id()|int %}
+        <form method="post" action="/delete_room">
+            <input type="hidden" value="{{ room_id }}" name='room_id'>
+            <input type="hidden" value="{{ current_user.get_id() }}" name='owner'>
+            <button type="submit">Delete Room</button>
+        </form>
+    {% endif %}
+{% endblock %}
+
 {% block main %}
 
-room id is {{ room_id }},<br>room name is {{ room_name }}, <br>username is {{ current_user.username }}
+room id is {{ room_id }},<br>room name is {{ room_name }}, <br>username is {{ current_user.username }}, user id is {{ current_user.get_id() }}
 
 <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
 <script>

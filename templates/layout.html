@@ -24,17 +24,18 @@
     {% endif %}
     {% if current_user.is_authenticated %}
         <a href="{{ url_for('dashboard') }}">Dashboard</a>
+        <a href="{{ url_for('new_room') }}">Create a Room</a>
         <a href="{{ url_for('logout') }}">Log out</a>
     {% endif %}
-    
+
+    <header>
     {% if get_flashed_messages() %}
-        <header>
             <div class="alert alert-primary mb-0 text-center" role="alert">
                 {{ get_flashed_messages() | join(" ") }}
             </div>
-        </header>
     {% endif %}
-
+    {% block header %}{% endblock %}
+    </header>
 
         <main class="container-fluid py-5 text-center">
             {% block main %}{% endblock %}

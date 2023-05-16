@@ -17,14 +17,14 @@ login_manager.init_app(app)
 login_manager.login_view = 'login' # name of function to login page
 login_manager.login_message = 'Please log in first.'
 
-rooms = [{"room_id":1, "room_name": "best room"},
-         {"room_id":2, "room_name": "lol room"},
-         {"room_id":3, "room_name": "holy shit room"}]
+# rooms = [{"room_id":1, "room_name": "best room"},
+#          {"room_id":2, "room_name": "lol room"},
+#          {"room_id":3, "room_name": "holy shit room"}]
 
 
 @login_manager.user_loader
 def load_user(user_id):
-    db = get_db()
+    db = get_db(app.config['DATABASE'])
     user = db.execute('SELECT * FROM users WHERE id = ?', (user_id,)).fetchone()
     if user:
         return User(id=user['id'], username=user['username'], password=user['password'])
@@ -33,23 +33,28 @@ def load_user(user_id):
 
 class User(UserMixin):
     def __init__(self, id, username, password):
-        self.id = id
+        self.id = int(id)
         self.username = username
         self.password = password
 
-def get_db():
-    """Get the database connection for the current thread."""
-    if 'db' not in g:
-        g.db = sqlite3.connect(app.config['DATABASE'])
-        g.db.row_factory = sqlite3.Row
-    return g.db
+def get_db(db_name):
+    """Get the database connection for the specified database name."""
+    if 'dbs' not in g:
+        g.dbs = {}  # Store database connections in a dictionary
+    if db_name not in g.dbs:
+        g.dbs[db_name] = sqlite3.connect(db_name)
+        g.dbs[db_name].row_factory = sqlite3.Row
+    return g.dbs[db_name]
+
 
 @app.teardown_appcontext
 def close_db(error):
-    """Close the database connection at the end of a request."""
-    db = g.pop('db', None)
-    if db is not None:
-        db.close()
+    """Close the database connections at the end of a request."""
+    dbs = getattr(g, 'dbs', {})
+    for db_name, db_conn in dbs.items():
+        db_conn.close()
+    g.dbs = {}
+
 
 # SocketIO
 @socketio.on('systemMessage')
@@ -92,10 +97,14 @@ def index():
 @login_required
 def redirect_chatroom(room_id):
     room_name = ''
-    for room in rooms:
+    owner = ''
+    db = get_db('rooms.db')
+    rooms_db = db.execute('SELECT * FROM rooms')
+    for room in rooms_db:
         if room['room_id'] == int(room_id):
             room_name = room['room_name']
-    return render_template('chatroom.html',room_id=room_id,room_name=room_name)
+            owner = int(room['owner'])
+    return render_template('chatroom.html',room_id=room_id,room_name=room_name,owner=owner)
 
 @app.route("/register", methods=['POST','GET'])
 def register():
@@ -109,7 +118,7 @@ def register():
     confirm_password = request.form.get('confirm_password')
 
     # Check if username in db and is valid
-    db = get_db()
+    db = get_db(app.config['DATABASE'])
     username_db = db.execute('SELECT * FROM users')
     for row in username_db:
         row = dict(row)['username']
@@ -123,7 +132,7 @@ def register():
         return render_template("register.html")
 
     # Add user into db if both valid
-    db = get_db()
+    db = get_db(app.config['DATABASE'])
     cursor = db.cursor()
     password = generate_password_hash(password)
     try:
@@ -142,7 +151,7 @@ def login():
     # Else get user input
     username = request.form.get('username')
     password = request.form.get('password')
-    db = get_db()
+    db = get_db(app.config['DATABASE'])
     userdb = db.execute('SELECT * FROM users')
     for row in userdb:
         row = dict(row)
@@ -166,7 +175,46 @@ def logout():
 @app.route("/dashboard", methods=['POST','GET'])
 @login_required
 def dashboard():
+    db = get_db('rooms.db')
+    rooms_db = db.execute('SELECT * FROM rooms')
+    rooms = []
+    for row in rooms_db:
+        room = dict(row)
+        rooms.append(room)
     return render_template('dashboard.html', rooms=rooms)
+
+@app.route("/new_room", methods=['POST','GET'])
+def new_room():
+    if request.method == 'GET':
+        return render_template('new_room.html')
+    # Get user input
+    room_name = request.form.get('room_name')
+    room_desc = request.form.get('room_desc')
+    user_id = current_user.get_id()
+    # Get room database
+    db = get_db('rooms.db')
+    db.execute('INSERT INTO rooms (room_name, room_desc, owner) VALUES (?, ?, ?)', (room_name, room_desc, user_id))
+    db.commit()
+    flash('New room has been created successfully!')
+    return redirect(url_for('dashboard'))
+
+@app.route("/delete_room", methods=['POST'])
+def delete_room():
+    room_id = request.form.get('room_id')
+    owner = request.form.get('owner')
+    db = get_db('rooms.db')
+    rooms_db = db.execute('SELECT * FROM rooms')
+    for row in rooms_db:
+        print(row['room_id'])
+        print(row['owner'])
+        if row['room_id'] == int(room_id):
+            if row['owner'] == int(owner):
+                print("DELETE FROM DATABASE")
+                db.execute('DELETE FROM rooms WHERE room_id = ? AND owner = ?', (room_id, int(owner)))
+                db.commit()
+                return redirect(url_for('dashboard'))
+    flash('You are not the owner')
+    return redirect(url_for('dashboard'))
 
 if __name__ == '__main__':
     socketio.run(app)

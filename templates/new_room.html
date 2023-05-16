@@ -1,0 +1,15 @@
+{% extends "layout.html" %}
+
+{% block title %}
+Create a new room
+{% endblock %}
+
+{% block main %}
+    <form action="/new_room" method="post">
+        <div class="mb-3">
+            <input type="text" name="room_name" id="room_name" placeholder="What's the name of the room?" autocomplete="off" autofocus>
+            <input type="text" name="room_desc" id="room_desc" placeholder="Description" autocomplete="off" autofocus>
+        </div>
+        <button type="submit" class="btn btn-primary">Create Room!</button>
+    </form>
+{% endblock %}

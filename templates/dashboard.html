@@ -26,12 +26,22 @@ Dashboard
             {% endfor %}
         });
     </script>
-
+    
+    <table>
+        <tr>
+            <th>Room Name</th>
+            <th>Description</th>
+            <th>Owner ID</th>
+            <th></th>
+        </tr>
     {% for room in rooms %}
-    <div>
-        <h3>{{ room['room_name'] }}</h3>
-        <button type="submit" id="room-{{ room['room_id'] }}" value="{{ room['room_name'] }}">Join</button>
-    </div>
+    <tr>
+        <td>{{ room['room_name'] }}</td>
+        <td>{{ room['room_desc'] }}</td>
+        <td>{{ room['owner'] }}</td>
+        <td><button type="submit" id="room-{{ room['room_id'] }}" value="{{ room['room_name'] }}">Join</button></td>
+    </tr>
     {% endfor %}
 
+    </table>
 {% endblock %}
