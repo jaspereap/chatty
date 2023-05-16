@@ -17,8 +17,9 @@ login_manager.init_app(app)
 login_manager.login_view = 'login' # name of function to login page
 login_manager.login_message = 'Please log in first.'
 
-rooms = [{"room_id": 1, "room_name": "best room"},
-         {"room_id":2, "room_name": "lol room"}]
+rooms = [{"room_id":1, "room_name": "best room"},
+         {"room_id":2, "room_name": "lol room"},
+         {"room_id":3, "room_name": "holy shit room"}]
 
 
 @login_manager.user_loader
@@ -62,15 +63,22 @@ def disconnect():
 @socketio.on('joinRoom')
 def joinRoom(data):
     room_id = data['room_id']
+    room_name = data['room_name']
     username = data['username']
-    print(f"{username} joins room {room_id}")
+    print(f"{username} joins room {room_name}, with room id: {room_id}")
     join_room(room_id)
+    emit('redirect_chatroom', {'room_id': room_id, 'room_name': room_name})
+    print("Emitting event 'redirect_chatroom'")
 
 
 # Flask Routing
 @app.route("/")
 def index():
     return render_template("index.html")
+
+@app.route('/chatroom/<string:room_id>')
+def redirect_chatroom(room_id, room_name):
+    return render_template('chatroom.html',room_id=room_id,room_name=room_name)
 
 @app.route("/register", methods=['POST','GET'])
 def register():

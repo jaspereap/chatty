@@ -8,16 +8,30 @@ Dashboard
     Welcome, {{ current_user.username }}
     <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
     <script>
-    document.addEventListener("DOMContentLoaded", function() {
-        
+        document.addEventListener("DOMContentLoaded", function() {
             var socket = io();
             username = "{{ current_user.username }}";
 
             socket.on('connect', function(){
                 socket.emit('systemMessage',username+' has connected');
             });
-    
-    });
+
+            socket.on('redirect_chatroom', function(data){
+                var room_id = data['room_id'];
+                var room_name = data['room_name'];
+                console.log('Received redirect request from server, room_id is: '+room_id+' room name is '+room_name);
+                // window.location.href = '/chatroom/' + room_id;
+            });
+
+            {% for room in rooms %}
+                document.querySelector("#" + "room-{{ room['room_id'] }}").addEventListener('click', function(e){
+                    e.preventDefault();
+                    var roomName = document.querySelector("#" + "room-{{ room['room_id'] }}").value;
+                    socket.emit('systemMessage',roomName);
+                    socket.emit('joinRoom',{'username':username,'room_id':{{ room['room_id'] }}, 'room_name':"{{ room['room_name'] }}" });
+                });
+            {% endfor %}
+        });
     </script>
 
     {% for room in rooms %}
@@ -25,19 +39,6 @@ Dashboard
         <h3>{{ room['room_name'] }}</h3>
         <button type="submit" id="room-{{ room['room_id'] }}" value="{{ room['room_name'] }}">Join</button>
     </div>
-    <script>
-        document.addEventListener("DOMContentLoaded", function(){
-            var socket = io();
-            var room_id = "{{ room['room_id'] }}";
-            var room_query_id = "room-{{ room['room_id'] }}";
-            document.querySelector("#" + room_query_id).addEventListener('click', function(e){
-            e.preventDefault();
-            var roomName = document.querySelector("#" + room_query_id).value;
-            socket.emit('systemMessage',roomName);
-            socket.emit('joinRoom',{'username':username,'room_id':room_id });
-            });
-        });
-
-    </script>
     {% endfor %}
+
 {% endblock %}
