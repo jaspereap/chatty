@@ -77,7 +77,12 @@ def index():
     return render_template("index.html")
 
 @app.route('/chatroom/<string:room_id>')
-def redirect_chatroom(room_id, room_name):
+@login_required
+def redirect_chatroom(room_id):
+    room_name = ''
+    for room in rooms:
+        if room['room_id'] == int(room_id):
+            room_name = room['room_name']
     return render_template('chatroom.html',room_id=room_id,room_name=room_name)
 
 @app.route("/register", methods=['POST','GET'])

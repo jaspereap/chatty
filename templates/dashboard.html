@@ -20,7 +20,7 @@ Dashboard
                 var room_id = data['room_id'];
                 var room_name = data['room_name'];
                 console.log('Received redirect request from server, room_id is: '+room_id+' room name is '+room_name);
-                // window.location.href = '/chatroom/' + room_id;
+                window.location.href = '/chatroom/' + room_id;
             });
 
             {% for room in rooms %}
@@ -28,7 +28,7 @@ Dashboard
                     e.preventDefault();
                     var roomName = document.querySelector("#" + "room-{{ room['room_id'] }}").value;
                     socket.emit('systemMessage',roomName);
-                    socket.emit('joinRoom',{'username':username,'room_id':{{ room['room_id'] }}, 'room_name':"{{ room['room_name'] }}" });
+                    socket.emit('joinRoom',{'username':username,'room_id':{{ room['room_id'] }}, 'room_name':'{{ room['room_name'] }}'});
                 });
             {% endfor %}
         });
