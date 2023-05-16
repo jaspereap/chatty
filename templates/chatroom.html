@@ -23,10 +23,19 @@ room id is {{ room_id }},<br>room name is {{ room_name }}, <br>username is {{ cu
     var socket = io();
     socket.emit('joinRoom',{'username':'{{ current_user.username }}','room_id':{{ room_id }}, 'room_name':'{{ room_name }}'});
 
-    socket.on('group_message', function(message){
+    socket.on('group_message', function(data){
         var messageBox = document.querySelector('#message-box');
-        messageBox.innerHTML += '<div>'+ message + '</div>';
+        message = data['message'];
+        username = data['username'];
+        date = data['date'];
+        messageBox.innerHTML += '<div>'+ date +"   " + username + ": " + message + '</div>';
     });
+
+    socket.on('clientMessage', function(data){
+        var messageBox = document.querySelector('#message-box');
+        messageBox.innerHTML += '<div>' + data + '</div>';
+
+    })
 </script>
 
 

@@ -3,6 +3,7 @@ from flask_login import LoginManager, UserMixin, login_user, logout_user, login_
 import sqlite3
 from werkzeug.security import check_password_hash, generate_password_hash
 from flask_socketio import SocketIO, send, emit, join_room, leave_room
+import datetime
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'super secret key'
@@ -16,11 +17,6 @@ login_manager.init_app(app)
 
 login_manager.login_view = 'login' # name of function to login page
 login_manager.login_message = 'Please log in first.'
-
-# rooms = [{"room_id":1, "room_name": "best room"},
-#          {"room_id":2, "room_name": "lol room"},
-#          {"room_id":3, "room_name": "holy shit room"}]
-
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -79,14 +75,15 @@ def joinRoom(data):
     username = data['username']
     print(f"{username} joins room {room_name}, with room id: {room_id}")
     join_room(room_id)
-    emit('group_message',f"{username} has joined {room_name}.",to=room_id)
+    emit('clientMessage',f"{username} has joined {room_name}.",to=room_id)
 
 @socketio.on('groupMessage')
 def groupMessage(data):
     username = data['username']
     message = data['message']
     room_id = data['room_id']
-    emit('group_message',f"{username}: {message}",to=room_id)
+    date = datetime.datetime.now().strftime("%H:%M:%S")
+    emit('group_message',{'username':username,'message':message,'date':date},to=room_id)
 
 # Flask Routing
 @app.route("/")
