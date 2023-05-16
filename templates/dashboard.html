@@ -28,7 +28,7 @@ Dashboard
     <script>
         document.addEventListener("DOMContentLoaded", function(){
             var socket = io();
-            var room_id = {{ room['room_id'] }}
+            var room_id = "{{ room['room_id'] }}";
             var room_query_id = "room-{{ room['room_id'] }}";
             document.querySelector("#" + room_query_id).addEventListener('click', function(e){
             e.preventDefault();
