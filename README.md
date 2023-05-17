@@ -9,6 +9,7 @@ Chatty is a simple chatting web application that allows users to create chatroom
 - Login: Registered users can log in to their accounts.
 - Dashboard: Users have access to a dashboard where they can manage their chatrooms and participate in conversations.
 - Create Chatrooms: Users can create their own chatrooms and set a description.
+- Delete Chatrooms: Users that owns the chatroom can delete the room, along with the messages in it.
 - Join Chatrooms: Users can join existing chatrooms and engage in conversations with other participants.
 - Real-time Communication: Messages are sent and received in real-time, providing an interactive chatting experience.
 - Logout: Users can securely log out from their accounts.
@@ -63,8 +64,7 @@ Run the application:
 python app.py
 ```
 Access the application in your web browser at http://localhost:5000.
-## Configuration
-Database: By default, the application uses an SQLite database file (chatty.db) stored in the project's root directory. If you need to change the database settings, update the app.config['DATABASE'] configuration in app.py.
+
 ## Contributing
 Contributions are welcome! If you have any suggestions, improvements, or bug fixes, feel free to submit a pull request.
 
