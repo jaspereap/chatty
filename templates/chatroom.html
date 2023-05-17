@@ -6,12 +6,14 @@ Chatroom
 
 {% block header %}
     {% if owner == current_user.get_id()|int %}
+        <i>You are the owner of this room</i>
         <form method="post" action="/delete_room">
             <input type="hidden" value="{{ room_id }}" name='room_id'>
             <input type="hidden" value="{{ current_user.get_id() }}" name='owner'>
             <button type="submit">Delete Room</button>
         </form>
     {% endif %}
+
 {% endblock %}
 
 {% block main %}
@@ -36,11 +38,17 @@ room id is {{ room_id }},<br>room name is {{ room_name }}, <br>username is {{ cu
         messageBox.innerHTML += '<div>' + data + '</div>';
 
     })
+
 </script>
 
 
+
 <div id="message-box">
+    {% for message in message_history %}
+        <div>{{ message['date'] }} {{ message['username'] }}: {{ message['message'] }}</div>
+    {% endfor %}
 </div>
+
 {% endblock %}
 
 {% block footer %}
@@ -58,7 +66,8 @@ room id is {{ room_id }},<br>room name is {{ room_name }}, <br>username is {{ cu
         var message = messageInput.value;
         var room_id = {{ room_id }};
         var username = '{{ current_user.username }}';
-        socket.emit('groupMessage', {'message':message,'room_id':room_id,'username':username} );
+        var user_id = {{ current_user.get_id() }};
+        socket.emit('groupMessage', {'message':message,'room_id':room_id,'username':username, 'user_id':user_id} );
     });
 
     messageInput.addEventListener('keydown', function(event){

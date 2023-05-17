@@ -61,12 +61,12 @@ def systemMessage(message):
 def disconnect():
     print(current_user.username + " has disconnected")
 
-@socketio.on('redirect_room')
-def redirect_room(data):
-    room_id = data['room_id']
-    room_name = data['room_name']
-    username = data['username']
-    return render_template('chatroom.html', room_id=room_id,room_name=room_name)
+# @socketio.on('redirect_room')
+# def redirect_room(data):
+#     room_id = data['room_id']
+#     room_name = data['room_name']
+#     username = data['username']
+#     return render_template('chatroom.html', room_id=room_id,room_name=room_name)
 
 @socketio.on('joinRoom')
 def joinRoom(data):
@@ -82,7 +82,12 @@ def groupMessage(data):
     username = data['username']
     message = data['message']
     room_id = data['room_id']
+    user_id = data['user_id']
     date = datetime.datetime.now().strftime("%H:%M:%S")
+    # Store to history
+    db = get_db('messages.db')
+    messages_db = db.execute('INSERT INTO messages (message, room_id, user_id, username, date) VALUES (?, ?, ?, ?, ?)', (message, room_id, user_id, username, date))
+    db.commit()
     emit('group_message',{'username':username,'message':message,'date':date},to=room_id)
 
 # Flask Routing
@@ -95,13 +100,20 @@ def index():
 def redirect_chatroom(room_id):
     room_name = ''
     owner = ''
+    message_history = []
     db = get_db('rooms.db')
     rooms_db = db.execute('SELECT * FROM rooms')
     for room in rooms_db:
         if room['room_id'] == int(room_id):
             room_name = room['room_name']
             owner = int(room['owner'])
-    return render_template('chatroom.html',room_id=room_id,room_name=room_name,owner=owner)
+    db.close()
+    db = get_db('messages.db')
+    messages_db = db.execute('SELECT * FROM messages WHERE room_id = ?', room_id).fetchall()
+    for message in messages_db:
+        message_history.append(dict(message))
+    print(message_history)
+    return render_template('chatroom.html',room_id=room_id,room_name=room_name,owner=owner, message_history=message_history)
 
 @app.route("/register", methods=['POST','GET'])
 def register():
