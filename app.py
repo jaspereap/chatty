@@ -214,14 +214,18 @@ def delete_room():
     db = get_db('rooms.db')
     rooms_db = db.execute('SELECT * FROM rooms')
     for row in rooms_db:
-        print(row['room_id'])
-        print(row['owner'])
         if row['room_id'] == int(room_id):
             if row['owner'] == int(owner):
                 print("DELETE FROM DATABASE")
                 db.execute('DELETE FROM rooms WHERE room_id = ? AND owner = ?', (room_id, int(owner)))
                 db.commit()
+                db.close()
+                db = get_db('messages.db')
+                db.execute('DELETE FROM messages WHERE room_id = ?', (room_id,))
+                db.commit()
+                db.close()
                 return redirect(url_for('dashboard'))
+    
     flash('You are not the owner')
     return redirect(url_for('dashboard'))
 

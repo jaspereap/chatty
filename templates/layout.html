@@ -17,16 +17,30 @@
     </head>
 
     <body>
-    Nav Bar
+    <ul class="nav nav-underline">
     {% if not current_user.is_authenticated %}
-        <a href="{{ url_for('register') }}">Register</a>
-        <a href="{{ url_for('login') }}">Login</a>
+        <li class="nav-item">
+            <a class="nav-link active" href="{{ url_for('register') }}">Register</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="{{ url_for('login') }}">Login</a>
+        </li>
     {% endif %}
     {% if current_user.is_authenticated %}
-        <a href="{{ url_for('dashboard') }}">Dashboard</a>
-        <a href="{{ url_for('new_room') }}">Create a Room</a>
-        <a href="{{ url_for('logout') }}">Log out</a>
+        <li class="nav-item">
+            <a class="nav-link" href="{{ url_for('dashboard') }}">Dashboard</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="{{ url_for('new_room') }}">Create a Room</a>
+        </li>
+        <li class="nav-item ms-auto">
+            <button type="button" class="btn btn-primary position-relative" onclick="location.href='{{ url_for('logout') }}'">
+              Log out
+            </button>
+        </li>
+          
     {% endif %}
+    </ul>
 
     <header>
     {% if get_flashed_messages() %}
@@ -37,7 +51,7 @@
     {% block header %}{% endblock %}
     </header>
 
-        <main class="container-fluid py-5 text-center">
+        <main class="container-fluid py-1 text-center">
             {% block main %}{% endblock %}
         </main>
 
