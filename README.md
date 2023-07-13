@@ -1,4 +1,4 @@
-# Chatty: Social Application
+# Chatty: Social Application by Jasper
 #### Description:
 ## Chatty
 Chatty is a simple chatting web application that allows users to create chatrooms and engage in real-time conversations. Users can socialize, discuss plans, or communicate with others within the chatrooms.
